@@ -1,0 +1,68 @@
+--Q-1. How many olympics games have been held?*/
+select  count(distinct games) total_olympic_games from athlete_event ;
+
+
+--Q-2 List down all Olympics games held so far.*/
+select distinct year,season,city
+from athlete_event ;
+
+
+--Q-3 Mention the total no of nations who participated in each olympics game?*/
+select games,count(distinct region)
+from athlete_event a join noc_region b
+on a.noc = b.noc2
+group by games;
+Q-4 Which nation has participated in all of the olympic games*/
+select b.region,count(distinct a.games) total_participated_games
+from athlete_event a join noc_region b
+on a.noc = b.noc2
+group by b.region 
+order by toatl_participated_games desc
+fetch first 4 rows only ;
+
+
+select b.region,count(distinct a.games) total_participated_games
+from athlete_event a join noc_region b
+on a.noc = b.noc2
+group by b.region 
+having count(distinct a.games) = (select count(distinct games) total_olympic_games from athlete_event) ;
+
+
+--Q-5 Identify the sport which was played in all summer olympics.*/
+--Approch-1
+ select sport,count(distinct games)
+ from athlete_event 
+ where games like '%Summer%'
+ group by sport
+ having count(distinct games) = (select count(distinct games)
+                                 from athlete_event 
+                                 where games like '%Summer%') ;
+
+ 
+ --Approch-2
+ select * from (
+ select sport,count(distinct games) total_games
+ from athlete_event 
+ where games like '%Summer%'
+ group by sport)S
+ where s.total_games = (select count(distinct games)
+                                 from athlete_event 
+                                 where games like '%Summer%') ;
+
+
+
+--Approch-3
+select * from(
+ select sport,count(distinct games) total_games,
+ rank() over(order by count(distinct games) desc) ranked
+ from athlete_event 
+ where games like '%Summer%'
+ group by sport)M
+ where m.ranked = 1;
+ 
+ 
+ Q-6. Which Sports were just played only once in the olympics.*/
+ select sport,count(distinct games) total_games
+ from athlete_event 
+ group by sport
+having count(distinct games) = 1 ;
